@@ -50,7 +50,7 @@ class Vocab(object):
         -------
         self (for composability)
         """
-        if len(self) > 0:
+        if len(self) > 1:
             log.warning('Scanning a second time may add to the total number of'
                         ' words in the vocab. Be careful when indexing one-hot'
                         ' vectors.')
@@ -63,7 +63,7 @@ class Vocab(object):
             self.total_seen += 1
 
             # when we pass the minimum count threshold, add it to the voab
-            if self.count[t] == self.min_count:
+            if self.counts[t] == self.min_count:
                 self.word2index[t] = len(self.words)
                 self.words.append(t)
 

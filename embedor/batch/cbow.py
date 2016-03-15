@@ -4,12 +4,12 @@ import logging
 
 import numpy as np
 
-import batch.base
+import embedor.batch.base
 
 log = logging.getLogger(__name__)
 
 
-class CBOW(batch.base.Batches):
+class CBOW(embedor.batch.base.Batches):
     """
     Create training batches for continuous bag of words embeddings, in which
     the context words predict the target word
@@ -26,11 +26,13 @@ class CBOW(batch.base.Batches):
         target word
         Default: (2, 2)
     """
-    def __init__(self, vocab, batch_size=64, context=(2, 2)):
-        super(CBOW, self).__init__(vocab=vocab, batch_size=batch_size)
+    def __init__(self, vocab, batch_size=64, tokens=None, context=(2, 2)):
+        super(CBOW, self).__init__(vocab=vocab,
+                                   batch_size=batch_size,
+                                   tokens=tokens)
         self.left, self.right = context
 
-    def next_batch(self):
+    def next(self):
         # vocab must have already been scanned
         assert(len(self.vocab) > 0)
 
@@ -51,13 +53,15 @@ class CBOW(batch.base.Batches):
             # if we've built up enough context
             if len(context) == window_size:
                 # add the target and the surrounding context to the batch
-                labels.append(context[self.left])
-                data.append(context[:self.left] + context[self.left + 1:])
+                # listify the context
+                context_list = list(context)
+                labels.append(context_list.pop(self.left))
+                data.append(context_list)
 
                 # if we have enough for a batch
                 if len(labels) == self.batch_size:
                     # yield the data as numpy arrays
-                    yield np.array(data), np.array(labels)
+                    return np.array(data), np.array(labels)
 
                     # reset the batch collector
                     data, labels = [], []
